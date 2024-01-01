@@ -9,6 +9,8 @@
 #include "../lib/messages.h"
 #include "../lib/01.h"
 #include "../lib/reader.h"
+#include "../lib/02.h"
+#include "../lib/lexer.h"
 
 
 void setUp() {}
@@ -57,11 +59,70 @@ void test_reader() {
     freeFileContents(&result);
 }
 
+void test_lexer() {
+    const char* input = "Game 1:;,";
+    Lexer* lexer = lexer_create(input);
+    char* value;
+    Token *token = lexer_next_token(lexer);
+    TEST_ASSERT_NOT_NULL(token);
+    TEST_ASSERT_EQUAL(T_STRING, token->type);
+    value = lexer_token_value(token);
+    TEST_ASSERT_EQUAL_STRING("Game", value);
+    free(value);
+    free(token);
+
+    token = lexer_next_token(lexer);
+    TEST_ASSERT_NOT_NULL(token);
+    TEST_ASSERT_EQUAL(T_NUMBER, token->type);
+    value = lexer_token_value(token);
+    TEST_ASSERT_EQUAL_STRING("1", value);
+    free(value);
+    free(token);
+
+    token = lexer_next_token(lexer);
+    TEST_ASSERT_NOT_NULL(token);
+    TEST_ASSERT_EQUAL(T_COLON, token->type);
+    value = lexer_token_value(token);
+    TEST_ASSERT_EQUAL_STRING(":", value);
+    free(value);
+    free(token);
+
+    token = lexer_next_token(lexer);
+    TEST_ASSERT_NOT_NULL(token);
+    TEST_ASSERT_EQUAL(T_SEMICOLON, token->type);
+    value = lexer_token_value(token);
+    TEST_ASSERT_EQUAL_STRING(";", value);
+    free(value);
+    free(token);
+
+    token = lexer_next_token(lexer);
+    TEST_ASSERT_NOT_NULL(token);
+    TEST_ASSERT_EQUAL(T_COMMA, token->type);
+    value = lexer_token_value(token);
+    TEST_ASSERT_EQUAL_STRING(",", value);
+    free(value);
+    free(token);
+
+    token = lexer_next_token(lexer);
+    TEST_ASSERT_NULL(token);
+
+    lexer_free(lexer);
+}
+
+void test_game_reader() {
+    Game *game = game_for_line("Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green");
+    Round max = max_throws_for_game(game);
+    TEST_ASSERT_EQUAL_STRING("1", game->id);
+    TEST_ASSERT_EQUAL_INT(6, max.blues);
+}
+
 int main(void) {
     UNITY_BEGIN();
     //RUN_TEST(test_01);
-    RUN_TEST(test_reader);
+    //RUN_TEST(test_reader);
     //RUN_TEST(test_01b);
+    RUN_TEST(test_game_reader);
+    //RUN_TEST(test_lexer);
 
     return UNITY_END();
 }

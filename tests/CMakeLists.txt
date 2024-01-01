@@ -11,4 +11,8 @@ add_executable(aoc2023_tests messagesTests.c
         ../lib/01.h
         ../lib/reader.c
         ../lib/reader.h
+        ../lib/02.c
+        ../lib/02.h
+        ../lib/lexer.c
+        ../lib/lexer.h
 )

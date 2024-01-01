@@ -8,6 +8,10 @@ add_executable(aoc2023 main.c
         lib/messages.c
         lib/reader.h
         lib/reader.c
+        lib/lexer.h
+        lib/lexer.c
         lib/01.h
         lib/01.c
+        lib/02.h
+        lib/02.c
 )
