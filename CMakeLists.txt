@@ -14,4 +14,6 @@ add_executable(aoc2023 main.c
         lib/01.c
         lib/02.h
         lib/02.c
+        lib/03.c
+        lib/03.h
 )

@@ -44,6 +44,7 @@ Token* lex_callback(Lexer *lexer, CharCallback callback, TokenType type) {
     token->type = type;
     token->value = &lexer->content[start];
     token->value_len = end - start;
+    token->position = lexer->position;
     lexer->position = end;
 
     return token;
@@ -57,32 +58,99 @@ Token* lex_number(Lexer *lexer) {
     return lex_callback(lexer, isdigit, T_NUMBER);
 }
 
+Token* lex_symbol(Lexer *lexer, char symbol, TokenType type) {
+    if (lexer->content[lexer->position] != symbol) {
+        return NULL;
+    }
+
+    Token *token = malloc(sizeof(Token));
+    token->type = type;
+    token->value = &lexer->content[lexer->position];
+    token->value_len = 1;
+    token->position = lexer->position;
+    lexer->position++;
+
+    return token;
+}
+
 Token* lex_punctuation(Lexer *lexer) {
-    if (lexer->content[lexer->position] == ':') {
-        Token *token = malloc(sizeof(Token));
-        token->type = T_COLON;
-        token->value = &lexer->content[lexer->position];
-        token->value_len = 1;
-        lexer->position++;
+    Token *token;
 
+    token = lex_symbol(lexer, ':', T_COLON);
+    if (token != NULL) {
         return token;
     }
-    if (lexer->content[lexer->position] == ';') {
-        Token *token = malloc(sizeof(Token));
-        token->type = T_SEMICOLON;
-        token->value = &lexer->content[lexer->position];
-        token->value_len = 1;
-        lexer->position++;
 
+    token = lex_symbol(lexer, ';', T_SEMICOLON);
+    if (token != NULL) {
         return token;
     }
-    if (lexer->content[lexer->position] == ',') {
-        Token *token = malloc(sizeof(Token));
-        token->type = T_COMMA;
-        token->value = &lexer->content[lexer->position];
-        token->value_len = 1;
-        lexer->position++;
 
+    token = lex_symbol(lexer, ',', T_COMMA);
+    if (token != NULL) {
+        return token;
+    }
+
+
+    return NULL;
+}
+
+Token* lex_symbols(Lexer *lexer) {
+    Token *token;
+
+    // */-+&=%$@
+    token = lex_symbol(lexer, '*', T_STAR);
+    if (token != NULL) {
+        return token;
+    }
+
+    token = lex_symbol(lexer, '/', T_SLASH);
+    if (token != NULL) {
+        return token;
+    }
+
+    token = lex_symbol(lexer, '-', T_MINUS);
+    if (token != NULL) {
+        return token;
+    }
+
+    token = lex_symbol(lexer, '+', T_PLUS);
+    if (token != NULL) {
+        return token;
+    }
+
+    token = lex_symbol(lexer, '&', T_AND);
+    if (token != NULL) {
+        return token;
+    }
+
+    token = lex_symbol(lexer, '=', T_EQUALS);
+    if (token != NULL) {
+        return token;
+    }
+
+    token = lex_symbol(lexer, '%', T_PERCENT);
+    if (token != NULL) {
+        return token;
+    }
+
+    token = lex_symbol(lexer, '$', T_DOLLAR);
+    if (token != NULL) {
+        return token;
+    }
+
+    token = lex_symbol(lexer, '@', T_AT);
+    if (token != NULL) {
+        return token;
+    }
+
+    token = lex_symbol(lexer, '.', T_PERIOD);
+    if (token != NULL) {
+        return token;
+    }
+
+    token = lex_symbol(lexer, '#', T_HASH);
+    if (token != NULL) {
         return token;
     }
 
@@ -106,6 +174,10 @@ Token* lexer_next_token(Lexer* lexer) {
         return token;
     }
     token = lex_punctuation(lexer);
+    if (token != NULL) {
+        return token;
+    }
+    token = lex_symbols(lexer);
     if (token != NULL) {
         return token;
     }

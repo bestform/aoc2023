@@ -10,6 +10,7 @@
 #include "../lib/01.h"
 #include "../lib/reader.h"
 #include "../lib/02.h"
+#include "../lib/03.h"
 #include "../lib/lexer.h"
 
 
@@ -66,6 +67,7 @@ void test_lexer() {
     Token *token = lexer_next_token(lexer);
     TEST_ASSERT_NOT_NULL(token);
     TEST_ASSERT_EQUAL(T_STRING, token->type);
+    TEST_ASSERT_EQUAL_INT(0, token->position);
     value = lexer_token_value(token);
     TEST_ASSERT_EQUAL_STRING("Game", value);
     free(value);
@@ -74,6 +76,7 @@ void test_lexer() {
     token = lexer_next_token(lexer);
     TEST_ASSERT_NOT_NULL(token);
     TEST_ASSERT_EQUAL(T_NUMBER, token->type);
+    TEST_ASSERT_EQUAL_INT(5, token->position);
     value = lexer_token_value(token);
     TEST_ASSERT_EQUAL_STRING("1", value);
     free(value);
@@ -109,6 +112,100 @@ void test_lexer() {
     lexer_free(lexer);
 }
 
+void test_lexer_symbols() {
+    const char* input = "*/-+&=%$@.";
+
+    Lexer* lexer = lexer_create(input);
+    char* value;
+
+    Token *token = lexer_next_token(lexer);
+    TEST_ASSERT_NOT_NULL(token);
+    TEST_ASSERT_EQUAL(T_STAR, token->type);
+    TEST_ASSERT_EQUAL_INT(0, token->position);
+    value = lexer_token_value(token);
+    TEST_ASSERT_EQUAL_STRING("*", value);
+    free(value);
+    free(token);
+
+    token = lexer_next_token(lexer);
+    TEST_ASSERT_NOT_NULL(token);
+    TEST_ASSERT_EQUAL(T_SLASH, token->type);
+    TEST_ASSERT_EQUAL_INT(1, token->position);
+    value = lexer_token_value(token);
+    TEST_ASSERT_EQUAL_STRING("/", value);
+    free(value);
+    free(token);
+
+    token = lexer_next_token(lexer);
+    TEST_ASSERT_NOT_NULL(token);
+    TEST_ASSERT_EQUAL(T_MINUS, token->type);
+    value = lexer_token_value(token);
+    TEST_ASSERT_EQUAL_STRING("-", value);
+    free(value);
+    free(token);
+
+    token = lexer_next_token(lexer);
+    TEST_ASSERT_NOT_NULL(token);
+    TEST_ASSERT_EQUAL(T_PLUS, token->type);
+    value = lexer_token_value(token);
+    TEST_ASSERT_EQUAL_STRING("+", value);
+    free(value);
+    free(token);
+
+    token = lexer_next_token(lexer);
+    TEST_ASSERT_NOT_NULL(token);
+    TEST_ASSERT_EQUAL(T_AND, token->type);
+    value = lexer_token_value(token);
+    TEST_ASSERT_EQUAL_STRING("&", value);
+    free(value);
+    free(token);
+
+    token = lexer_next_token(lexer);
+    TEST_ASSERT_NOT_NULL(token);
+    TEST_ASSERT_EQUAL(T_EQUALS, token->type);
+    value = lexer_token_value(token);
+    TEST_ASSERT_EQUAL_STRING("=", value);
+    free(value);
+    free(token);
+
+    token = lexer_next_token(lexer);
+    TEST_ASSERT_NOT_NULL(token);
+    TEST_ASSERT_EQUAL(T_PERCENT, token->type);
+    value = lexer_token_value(token);
+    TEST_ASSERT_EQUAL_STRING("%", value);
+    free(value);
+    free(token);
+
+    token = lexer_next_token(lexer);
+    TEST_ASSERT_NOT_NULL(token);
+    TEST_ASSERT_EQUAL(T_DOLLAR, token->type);
+    value = lexer_token_value(token);
+    TEST_ASSERT_EQUAL_STRING("$", value);
+    free(value);
+    free(token);
+
+    token = lexer_next_token(lexer);
+    TEST_ASSERT_NOT_NULL(token);
+    TEST_ASSERT_EQUAL(T_AT, token->type);
+    value = lexer_token_value(token);
+    TEST_ASSERT_EQUAL_STRING("@", value);
+    free(value);
+    free(token);
+
+    token = lexer_next_token(lexer);
+    TEST_ASSERT_NOT_NULL(token);
+    TEST_ASSERT_EQUAL(T_PERIOD, token->type);
+    value = lexer_token_value(token);
+    TEST_ASSERT_EQUAL_STRING(".", value);
+    free(value);
+    free(token);
+
+    token = lexer_next_token(lexer);
+    TEST_ASSERT_NULL(token);
+
+    lexer_free(lexer);
+}
+
 void test_game_reader() {
     Game *game = game_for_line("Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green");
     Round max = max_throws_for_game(game);
@@ -116,13 +213,35 @@ void test_game_reader() {
     TEST_ASSERT_EQUAL_INT(6, max.blues);
 }
 
+void test_03() {
+    Schematic *s = schematic_create();
+
+    schematic_add_line(s, "467..114..");
+    schematic_add_line(s, "...*......");
+    schematic_add_line(s, "..35..633.");
+    schematic_add_line(s, "......#...");
+    schematic_add_line(s, "617*......");
+    schematic_add_line(s, ".....+.58.");
+    schematic_add_line(s, "..592.....");
+    schematic_add_line(s, "......755.");
+    schematic_add_line(s, "...$.*....");
+    schematic_add_line(s, ".664.598..");
+
+    int actual = schematic_sum(s);
+    TEST_ASSERT_EQUAL_INT(4361, actual);
+
+    schematic_free(s);
+}
+
 int main(void) {
     UNITY_BEGIN();
     //RUN_TEST(test_01);
     //RUN_TEST(test_reader);
     //RUN_TEST(test_01b);
-    RUN_TEST(test_game_reader);
+    //RUN_TEST(test_game_reader);
     //RUN_TEST(test_lexer);
+    //RUN_TEST(test_lexer_symbols);
+    RUN_TEST(test_03);
 
     return UNITY_END();
 }

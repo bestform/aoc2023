@@ -2,6 +2,7 @@
 #include <malloc.h>
 #include "lib/01.h"
 #include "lib/02.h"
+#include "lib/03.h"
 #include "lib/reader.h"
 
 void solve01() {
@@ -64,8 +65,24 @@ void solve02b() {
     printf("%i", total);
 }
 
+void solve03() {
+    fileContents contents = linesOfFile("data/03.txt");
+
+    Schematic *s = schematic_create();
+
+    for (int i = 0; i < contents.len; i++) {
+        schematic_add_line(s, contents.lines[i]);
+    }
+
+    int result = schematic_sum(s);
+
+    printf("%i", result);
+
+    schematic_free(s);
+}
+
 int main() {
-    solve02b();
+    solve03();
 
     return 0;
 }

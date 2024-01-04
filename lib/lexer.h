@@ -11,12 +11,24 @@ typedef enum {
     T_COMMA,
     T_SEMICOLON,
     T_COLON,
+    T_STAR,
+    T_SLASH,
+    T_MINUS,
+    T_PLUS,
+    T_AND,
+    T_EQUALS,
+    T_PERCENT,
+    T_DOLLAR,
+    T_AT,
+    T_PERIOD,
+    T_HASH,
 } TokenType;
 
 typedef struct {
     TokenType type;
     const char* value;
     int value_len;
+    int position;
 } Token;
 
 typedef struct Lexer Lexer;
