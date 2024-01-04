@@ -74,17 +74,12 @@ int token_is_symbol(const Token *token) {
             );
 }
 
-bool is_next_to_symbol(int position, int len, int row, const long long int symbols[], int line_length, int line_count) {
+bool is_next_to_symbol(int position, int len, int row, char *symbols[], int line_length, int line_count) {
     int start_pos = position - 1;
     if (start_pos == -1) start_pos = 0;
     int end_pos = position + len;
     if (end_pos > line_length - 1) {
         end_pos = line_length - 1;
-    }
-
-    int mask = 0;
-    for (int i = start_pos; i <= end_pos; i++) {
-        mask |= 1<<i;
     }
 
     int start_row = row - 1;
@@ -94,18 +89,26 @@ bool is_next_to_symbol(int position, int len, int row, const long long int symbo
         end_row = line_count - 1;
     }
 
-    for (int i = start_row; i <= end_row; i++) {
-        if ((mask & symbols[i]) >= 1 ) return 1;
+    for (int i = start_pos; i <= end_pos; i++) {
+        for (int j = start_row; j <= end_row; j++) {
+            if (symbols[j][i] == 1 ) return 1;
+        }
     }
 
     return 0;
 }
 
 int schematic_sum(Schematic *s) {
+    char *symbols[s->line_count];
 
-    long long int symbols[s->line_count - 1];
     for (int i = 0; i < s->line_count; i++) {
-        symbols[i] = 0;
+        symbols[i] = (char *) malloc(sizeof(char) * s->line_length);
+    }
+
+    for (int i = 0; i < s->line_count; i++) {
+        for (int j = 0; j < s->line_length; j++) {
+            symbols[i][j] = 0;
+        }
     }
 
     for (int i = 0; i < s->line_count; i++) {
@@ -113,9 +116,9 @@ int schematic_sum(Schematic *s) {
         Token *token;
         while ((token = lexer_next_token(lexer)) != NULL) {
             if (token_is_symbol(token)) {
-                symbols[i] |= 1<<token->position;
+                symbols[i][token->position] = 1;
             }
-            free(token);
+            lexer_token_free(token);
         }
         lexer_free(lexer);
     }
@@ -129,15 +132,17 @@ int schematic_sum(Schematic *s) {
                 if (is_next_to_symbol(token->position, token->value_len, i, symbols, s->line_length, s->line_count)) {
                     char* value = lexer_token_value(token);
                     int num = atoi(value);
-                    printf("%i\n", num);
                     total += num;
                     free(value);
                 }
-                symbols[i] |= 1<<token->position;
             }
             free(token);
         }
         lexer_free(lexer);
+    }
+
+    for (int i = 0; i < s->line_count; i++) {
+        free(symbols[i]);
     }
 
     return total;

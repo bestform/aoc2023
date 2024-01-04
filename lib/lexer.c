@@ -199,6 +199,10 @@ void lexer_free(Lexer* lexer) {
     free(lexer);
 }
 
+void lexer_token_free(Token *token) {
+    free(token);
+}
+
 
 
 

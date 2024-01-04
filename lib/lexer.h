@@ -37,5 +37,6 @@ Lexer* lexer_create(const char* content);
 Token* lexer_next_token(Lexer* lexer);
 char* lexer_token_value(Token *token);
 void lexer_free(Lexer* lexer);
+void lexer_token_free(Token *token);
 
 #endif //AOC2023_LEXER_H

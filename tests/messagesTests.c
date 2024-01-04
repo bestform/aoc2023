@@ -235,12 +235,12 @@ void test_03() {
 
 int main(void) {
     UNITY_BEGIN();
-    //RUN_TEST(test_01);
-    //RUN_TEST(test_reader);
-    //RUN_TEST(test_01b);
-    //RUN_TEST(test_game_reader);
-    //RUN_TEST(test_lexer);
-    //RUN_TEST(test_lexer_symbols);
+    RUN_TEST(test_01);
+    RUN_TEST(test_reader);
+    RUN_TEST(test_01b);
+    RUN_TEST(test_game_reader);
+    RUN_TEST(test_lexer);
+    RUN_TEST(test_lexer_symbols);
     RUN_TEST(test_03);
 
     return UNITY_END();
