@@ -233,6 +233,26 @@ void test_03() {
     schematic_free(s);
 }
 
+void test_03b() {
+    Schematic *s = schematic_create();
+
+    schematic_add_line(s, "467..114..");
+    schematic_add_line(s, "...*......");
+    schematic_add_line(s, "..35..633.");
+    schematic_add_line(s, "......#...");
+    schematic_add_line(s, "617*......");
+    schematic_add_line(s, ".....+.58.");
+    schematic_add_line(s, "..592.....");
+    schematic_add_line(s, "......755.");
+    schematic_add_line(s, "...$.*....");
+    schematic_add_line(s, ".664.598..");
+
+    int actual = schematic_gear_ratio_sum(s);
+    TEST_ASSERT_EQUAL_INT(467835, actual);
+
+    schematic_free(s);
+}
+
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_01);
@@ -242,6 +262,7 @@ int main(void) {
     RUN_TEST(test_lexer);
     RUN_TEST(test_lexer_symbols);
     RUN_TEST(test_03);
+    RUN_TEST(test_03b);
 
     return UNITY_END();
 }

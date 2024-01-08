@@ -74,6 +74,22 @@ int token_is_symbol(const Token *token) {
             );
 }
 
+int token_is_star(const Token *token) {
+    return token->type == T_STAR;
+}
+
+typedef struct {
+    int x;
+    int y;
+    int* numbers;
+    size_t numbers_count;
+} Star;
+
+typedef struct {
+    Star* stars;
+    size_t stars_count;
+} Stars;
+
 bool is_next_to_symbol(int position, int len, int row, char *symbols[], int line_length, int line_count) {
     int start_pos = position - 1;
     if (start_pos == -1) start_pos = 0;
@@ -96,6 +112,131 @@ bool is_next_to_symbol(int position, int len, int row, char *symbols[], int line
     }
 
     return 0;
+}
+
+void stars_add_or_create(Stars* stars, int x, int y, int number) {
+
+    if (stars->stars_count == 0) {
+        stars->stars = malloc(sizeof(Star));
+    }
+    bool is_new = true;
+    size_t index = -1;
+    for (int i = 0; i < stars->stars_count; i++) {
+        if (stars->stars[i].x == x && stars->stars[i].y == y) {
+            index = i;
+            is_new = false;
+            break;
+        }
+    }
+    if (index == -1) {
+        index = stars->stars_count;
+        stars->stars_count++;
+        stars->stars = realloc(stars->stars, sizeof(Star) * stars->stars_count);
+        index = stars->stars_count - 1;
+    }
+
+    stars->stars[index].x = x;
+    stars->stars[index].y = y;
+    if (is_new) {
+        stars->stars[index].numbers_count = 1;
+    } else {
+        stars->stars[index].numbers_count++;
+    }
+
+    if (is_new) {
+        stars->stars[index].numbers = malloc(sizeof(int));
+    } else {
+        stars->stars[index].numbers = realloc(stars->stars[index].numbers, sizeof(int) * stars->stars[index].numbers_count);
+    }
+    stars->stars[index].numbers[stars->stars[index].numbers_count - 1] = number;
+
+}
+
+void check_stars(Stars* stars, int number, int position, int len, int row, char *symbols[], int line_length, int line_count) {
+    int start_pos = position - 1;
+    if (start_pos == -1) start_pos = 0;
+    int end_pos = position + len;
+    if (end_pos > line_length - 1) {
+        end_pos = line_length - 1;
+    }
+
+    int start_row = row - 1;
+    if (start_row < 0) start_row = 0;
+    int end_row = row + 1;
+    if (end_row >= line_count) {
+        end_row = line_count - 1;
+    }
+
+    for (int i = start_pos; i <= end_pos; i++) {
+        for (int j = start_row; j <= end_row; j++) {
+            if (symbols[j][i] == 1 ) {
+                stars_add_or_create(stars, i, j, number);
+            }
+        }
+    }
+
+}
+
+int schematic_gear_ratio_sum(Schematic *s) {
+    char *star_symbols[s->line_count];
+
+    for (int i = 0; i < s->line_count; i++) {
+        star_symbols[i] = (char *) malloc(sizeof(char) * s->line_length);
+    }
+
+    for (int i = 0; i < s->line_count; i++) {
+        for (int j = 0; j < s->line_length; j++) {
+            star_symbols[i][j] = 0;
+        }
+    }
+
+    size_t stars_count = 0;
+
+    for (int i = 0; i < s->line_count; i++) {
+        Lexer *lexer = lexer_create(s->lines[i]);
+        Token *token;
+        while ((token = lexer_next_token(lexer)) != NULL) {
+            if (token_is_star(token)) {
+                star_symbols[i][token->position] = 1;
+                stars_count++;
+            }
+            lexer_token_free(token);
+        }
+        lexer_free(lexer);
+    }
+
+    Stars *stars = malloc(sizeof(Stars));
+    stars->stars_count = 0;
+    stars->stars = malloc(sizeof(Star) * stars_count);
+
+    int total = 0;
+    for (int i = 0; i < s->line_count; i++) {
+        Lexer *lexer = lexer_create(s->lines[i]);
+        Token *token;
+        while ((token = lexer_next_token(lexer)) != NULL) {
+            if (token->type == T_NUMBER) {
+                int number = atoi(lexer_token_value(token));
+                check_stars(stars, number, token->position, token->value_len, i, star_symbols, s->line_length, s->line_count);
+            }
+            free(token);
+        }
+        lexer_free(lexer);
+    }
+
+    for (int i = 0; i < s->line_count; i++) {
+        free(star_symbols[i]);
+    }
+
+    for (int i = 0; i < stars->stars_count; i++) {
+        if (stars->stars[i].numbers_count == 2) {
+            total += stars->stars[i].numbers[0] * stars->stars[i].numbers[1];
+        }
+        free(stars->stars[i].numbers);
+    }
+
+    free(stars->stars);
+
+    return total;
 }
 
 int schematic_sum(Schematic *s) {

@@ -81,8 +81,25 @@ void solve03() {
     schematic_free(s);
 }
 
+void solve03b() {
+    fileContents contents = linesOfFile("data/03.txt");
+
+    Schematic *s = schematic_create();
+
+    for (int i = 0; i < contents.len; i++) {
+        schematic_add_line(s, contents.lines[i]);
+    }
+
+    int result = schematic_gear_ratio_sum(s);
+
+    printf("%i", result);
+
+    schematic_free(s);
+}
+
 int main() {
-    solve03();
+
+    solve03b();
 
     return 0;
 }
